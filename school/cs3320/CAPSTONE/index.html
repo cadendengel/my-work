@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Library Capstone</title>
+    <!-- React, ReactDOM, and Babel from CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5e6c8;
+            /* tan */
+            color: #4a1f1f;
+            font-family: Arial, sans-serif;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #5b0000;
+            /* darker maroon */
+            margin-bottom: 8px;
+        }
+
+        .box {
+            background: #fff7e8;
+            border: 2px solid #5b0000;
+            padding: 10px;
+            border-radius: 6px;
+            max-width: 420px;
+        }
+
+        .book {
+            padding: 6px 4px;
+            border-bottom: 1px solid #d6c4a8;
+            cursor: pointer;
+        }
+
+        .book:last-child {
+            border-bottom: none;
+        }
+
+        .book:hover {
+            background: #f0dfbf;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        input {
+            padding: 6px;
+            border: 1px solid #5b0000;
+            border-radius: 4px;
+            background: #fffdf7;
+            color: #4a1f1f;
+        }
+
+        button {
+            padding: 6px 10px;
+            background: #5b0000;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+        }
+
+        .error {
+            color: #5b0000;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root" role="application"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const API = "http://localhost:3000";
+
+        function App() {
+            const [available, setAvailable] = useState([]);
+            const [checkedOut, setCheckedOut] = useState([]);
+            const [error, setError] = useState("");
+
+            async function loadBooks() {
+                try {
+                    const a = await fetch(API + "/books?avail=true");
+                    const b = await fetch(API + "/books?avail=false");
+                    setAvailable(await a.json());
+                    setCheckedOut(await b.json());
+                } catch {
+                    setError("Could not load books.");
+                }
+            }
+
+            useEffect(() => { loadBooks(); }, []);
+
+            async function addBook(book) {
+                setError("");
+                try {
+                    const res = await fetch(API + "/books", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(book)
+                    });
+                    if (!res.ok) throw new Error();
+                    loadBooks();
+                } catch {
+                    setError("Could not add book.");
+                }
+            }
+
+            async function updateBook(id, update) {
+                setError("");
+                try {
+                    const res = await fetch(API + "/books/" + id, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(update)
+                    });
+                    if (!res.ok) throw new Error();
+                    loadBooks();
+                } catch {
+                    setError("Could not update book.");
+                }
+            }
+
+            // Click an available book to check out
+            async function handleClickAvailable(book) {
+                const who = window.prompt("Checked out by:", "");
+                if (who === null || who.trim() === "") return;
+                const due = window.prompt("Due date:", "");
+                if (due === null || due.trim() === "") return;
+                await updateBook(book.id, {
+                    avail: false,
+                    who: who.trim(),
+                    due: due.trim()
+                });
+            }
+
+            // Click a checked-out book to check in
+            async function handleClickCheckedOut(book) {
+                const ok = window.confirm(
+                    "Check in this book?\n" + book.id + ": " + book.title
+                );
+                if (!ok) return;
+                await updateBook(book.id, {
+                    avail: true,
+                    who: "",
+                    due: ""
+                });
+            }
+
+            return (
+                <div>
+                    <div className="section">
+                        <div className="title">Available Books</div>
+                        <div className="box">
+                            {available.length === 0 ? "None" : available.map(b => (
+                                    <div className="book" key={b.id} onClick={() => handleClickAvailable(b)}>
+                                        {b.id}: {b.title}
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+
+                    <div className="section">
+                        <div className="title">Checked Out Books</div>
+                        <div className="box">
+                            {checkedOut.length === 0 ? "None" : checkedOut.map(b => (
+                                    <div className="book" key={b.id} onClick={() => handleClickCheckedOut(b)}>
+                                        {b.id}: {b.title}
+                                        {(b.who || b.due) && (
+                                            <div style={{ fontSize: '13px', marginTop: '4px', color: '#5b0000' }}>
+                                                Checked out by: {b.who || 'Unknown'}
+                                                {b.due ? ' — Due: ' + b.due : ''}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+
+                    <div className="section">
+                        <div className="title">Add Book</div>
+                        <div className="box">
+                            <AddBook onAdd={addBook} />
+                        </div>
+                    </div>
+
+                    {error && <div className="error">{error}</div>}
+                </div>
+            );
+        }
+
+        function AddBook({ onAdd }) {
+            const [id, setId] = useState("");
+            const [title, setTitle] = useState("");
+            const [author, setAuthor] = useState("");
+            const [publisher, setPublisher] = useState("");
+            const [isbn, setIsbn] = useState("");
+
+            const submit = e => {
+                e.preventDefault();
+                if (!id || !title || !author || !publisher || !isbn) return;
+                onAdd({
+                    id,
+                    title,
+                    author,
+                    publisher,
+                    isbn,
+                    avail: true,
+                    who: "",
+                    due: ""
+                });
+                setId("");
+                setTitle("");
+                setAuthor("");
+                setPublisher("");
+                setIsbn("");
+            };
+
+            return (
+                <form onSubmit={submit}>
+                    <input
+                        placeholder="ID"
+                        value={id}
+                        onChange={e => setId(e.target.value)}
+                    />
+                    <input
+                        placeholder="Title"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                    />
+                    <input
+                        placeholder="Author"
+                        value={author}
+                        onChange={e => setAuthor(e.target.value)}
+                    />
+                    <input
+                        placeholder="Publisher"
+                        value={publisher}
+                        onChange={e => setPublisher(e.target.value)}
+                    />
+                    <input
+                        placeholder="ISBN"
+                        value={isbn}
+                        onChange={e => setIsbn(e.target.value)}
+                    />
+                    <button>Add</button>
+                </form>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>REACT</title>
+    <!-- React, ReactDOM, and Babel from CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-soft: #111827;
+            --panel: #111827;
+            --panel-2: #0b1220;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --brand: #60a5fa;
+            --brand-2: #34d399;
+            --border: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body,
+        #root {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans,
+                "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            background: linear-gradient(120deg, var(--bg) 0%, #0a0f1e 100%);
+            color: var(--text);
+        }
+
+        /* Layout using CSS Grid */
+        .layout {
+            display: grid;
+            grid-template-areas:
+                "header header"
+                "left   right"
+                "footer footer";
+            grid-template-columns: 320px 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 16px;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        header {
+            grid-area: header;
+            background: radial-gradient(1200px 400px at 0% 0%, rgba(96, 165, 250, .1), transparent 60%),
+                radial-gradient(800px 300px at 100% 0%, rgba(52, 211, 153, .08), transparent 60%),
+                var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .brand .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            background: var(--brand);
+            box-shadow: 0 0 20px var(--brand);
+        }
+
+        .subtle {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .left {
+            grid-area: left;
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .03);
+        }
+
+        .right {
+            grid-area: right;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .03);
+        }
+
+        footer {
+            grid-area: footer;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, .02);
+        }
+
+        button {
+            background: linear-gradient(180deg, var(--brand), #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, .3);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root" role="application"></div>
+
+    <script type="text/babel">
+        // Functional components
+        function Header({ children }) {
+            return (
+                <header role="banner">
+                    <div className="brand">
+                        <div className="dot"></div>
+                        React Assignment
+                    </div>
+                    <div className="subtle">{children}</div>
+                </header>
+            );
+        }
+
+        function Footer() {
+            return (
+                <footer role="contentinfo">
+                    <span>This is the footer!</span>
+                    <span className="subtle">Made with React</span>
+                </footer>
+            );
+        }
+
+        function LeftColumn() {
+            return (
+                <aside className="left" role="complementary">
+                    <h2>Left Column</h2>
+                    <div className="card">
+                        <h3>Project Requirements</h3>
+                        <ul className="muted">
+                            <li>At least 4 components (in addition to App)</li>
+                            <li>2 components implemented as functions</li>
+                            <li>2 components implemented as classes with state</li>
+                            <ul className="muted">
+                                <li>One stateful component - show current time (updating)</li>
+                                <li>One stateful component - show click count of a button somewhere in the app.</li>
+                            </ul>
+                        </ul>
+                    </div>
+                    <div className="card">
+                        <h3>Page Layout</h3>
+                        <pre className="muted">
+                                +----------------------------+<br/>
+                                |           Header           |<br/>
+                                +----------------------------+<br/>
+                                | Left Column | Right Column |<br/>
+                                |  +-------+  |  +--------+  |<br/>
+                                |  |       |  |  |        |  |<br/>
+                                |  |       |  |  |        |  |<br/>
+                                |  +-------+  |  +--------+  |<br/>
+                                +----------------------------+
+                        </pre>
+                    </div>
+                </aside>
+            );
+        }
+
+        function RightColumn() {
+            return (
+                <main className="right" role="main">
+                    <h2>Right Column</h2>
+                    <div className="cols">
+                        <InfoCard />
+                        <ClickCounter />
+                    </div>
+                </main>
+            );
+        }
+
+        function InfoCard() {
+            return (
+                <div className="card">
+                    <h3>Info Card</h3>
+                    <p className="muted">
+                        This is a simple functional component. It doesn't manage state; it just renders props/content.
+                    </p>
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh50ur_HhupK7G4CeCIPuvDY9K8qj7CuiHYQ&s" alt="funny image" width="40%" />
+                </div>
+            );
+        }
+
+        
+        // Class components
+        class Clock extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { now: new Date() };
+            }
+            componentDidMount() {
+                this._timer = setInterval(() => this.setState({ now: new Date() }), 1000);
+            }
+            componentWillUnmount() {
+                clearInterval(this._timer);
+            }
+            render() {
+                return (
+                    <div className="mono" aria-live="polite" title="Current time">
+                        {this.state.now.toLocaleTimeString()}
+                    </div>
+                );
+            }
+        }
+
+        class ClickCounter extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { count: 0 };
+            }
+            increment = () => this.setState(({ count }) => ({ count: count + 1 }));
+            render() {
+                return (
+                    <div className="card" role="region">
+                        <h3>Click Counter</h3>
+                        <p className="muted">Clicks: <strong>{this.state.count}</strong></p>
+                        <button onClick={this.increment}>Add Click</button>
+                        <button onClick={() => this.setState({ count: 0 })} style={{ marginLeft: '0.5rem' }}>Reset</button>
+                    </div>
+                );
+            }
+        }
+
+        // App
+        function App() {
+            return (
+                <div className="layout">
+                    <Header>
+                        <span>Current Time: </span>
+                        <Clock />
+                    </Header>
+                    <LeftColumn />
+                    <RightColumn />
+                    <Footer />
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
